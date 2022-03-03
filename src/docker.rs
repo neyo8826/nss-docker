@@ -2,16 +2,27 @@ use std::collections::HashMap;
 
 use isahc::{HttpClient, ReadResponseExt};
 use isahc::config::{Configurable, Dialer};
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
+use serde::de::DeserializeOwned;
+
+use crate::{ResponseError, ResponseResult};
 
 pub struct Docker {
 	client: HttpClient,
+}
+
+#[allow(clippy::option_if_let_else)]
+fn deserialize_container_name<'de, D>(d: D) -> Result<String, D::Error> where D: Deserializer<'de> {
+	let name: String = Deserialize::deserialize(d)?;
+	Ok(if let Some(name) = name.strip_prefix('/') { name.to_owned() } else { name })
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Container {
 	pub config: Config,
+	#[serde(deserialize_with = "deserialize_container_name")]
+	pub name: String,
 	pub network_settings: NetworkSettings,
 }
 
@@ -42,21 +53,27 @@ pub struct Network {
 }
 
 impl Docker {
-	pub fn connect() -> Result<Self, isahc::Error> {
+	pub fn connect() -> ResponseResult<Self> {
 		let client = isahc::HttpClientBuilder::new()
 			.max_connections(1)
 			.dial(Dialer::unix_socket("/var/run/docker.sock"))
 			.default_header("Content-Type", "application/json")
 			.default_header("Accept", "application/json")
-			.build()?;
+			.build().map_err(|_| ResponseError::Unavail)?;
 		Ok(Self { client })
 	}
 
-	pub fn get_containers(&self) -> std::io::Result<Vec<SmallContainer>> {
-		Ok(self.client.get("http://localhost/containers/json?all=false")?.json()?)
+	pub fn get_containers(&self) -> ResponseResult<Vec<SmallContainer>> {
+		self.get_json("http://localhost/containers/json?all=false")
 	}
 
-	pub fn get_container(&self, id: &str) -> std::io::Result<Container> {
-		Ok(self.client.get(format!("http://localhost/containers/{}/json", id))?.json()?)
+	pub fn get_container(&self, id: &str) -> ResponseResult<Container> {
+		self.get_json(&format!("http://localhost/containers/{}/json", id))
+	}
+
+	fn get_json<T: DeserializeOwned>(&self, uri: &str) -> ResponseResult<T> {
+		self.client
+			.get(uri).map_err(|_| ResponseError::NotFound)?
+			.json().map_err(|_| ResponseError::NotFound)
 	}
 }
