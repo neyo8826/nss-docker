@@ -68,7 +68,7 @@ impl Docker {
 	}
 
 	pub fn get_container(&self, id: &str) -> ResponseResult<Container> {
-		self.get_json(&format!("http://localhost/containers/{}/json", id))
+		self.get_json(&format!("http://localhost/containers/{id}/json"))
 	}
 
 	fn get_json<T: DeserializeOwned>(&self, uri: &str) -> ResponseResult<T> {

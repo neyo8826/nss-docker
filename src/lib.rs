@@ -26,9 +26,6 @@ clippy::too_many_lines,
 clippy::wildcard_imports,
 )]
 
-#[macro_use]
-extern crate lazy_static;
-
 mod docker;
 
 use std::collections::HashMap;
