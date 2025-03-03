@@ -1,43 +1,13 @@
-#![warn(
-clippy::nursery,
-clippy::pedantic,
-)]
-#![warn(
-clippy::dbg_macro,
-clippy::float_cmp_const,
-clippy::multiple_inherent_impl,
-clippy::todo,
-clippy::unimplemented,
-clippy::unwrap_in_result,
-clippy::unwrap_used,
-clippy::use_debug,
-)]
-#![allow(
-clippy::default_trait_access,
-clippy::explicit_deref_methods,
-clippy::fn_params_excessive_bools,
-clippy::future_not_send,
-clippy::multiple_crate_versions,
-clippy::non_ascii_literal,
-clippy::redundant_else,
-clippy::semicolon_if_nothing_returned,
-clippy::too_many_arguments,
-clippy::too_many_lines,
-clippy::wildcard_imports,
-)]
-
 mod docker;
 
-use std::collections::HashMap;
-use std::net::IpAddr;
-use std::str::FromStr;
-
-use libnss::host::{Addresses, AddressFamily, Host, HostHooks};
+use docker::Docker;
+use libnss::host::{AddressFamily, Addresses, Host, HostHooks};
 use libnss::interop::Response;
 use libnss::libnss_host_hooks;
 use once_cell::sync::Lazy;
-
-use docker::Docker;
+use std::collections::HashMap;
+use std::net::IpAddr;
+use std::str::FromStr;
 
 use crate::docker::{Container, Network, SmallContainer};
 

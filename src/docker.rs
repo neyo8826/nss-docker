@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use isahc::{HttpClient, ReadResponseExt};
 use isahc::config::{Configurable, Dialer};
-use serde::{Deserialize, Deserializer};
+use isahc::{HttpClient, ReadResponseExt};
 use serde::de::DeserializeOwned;
+use serde::{Deserialize, Deserializer};
 
 use crate::{ResponseError, ResponseResult};
 
@@ -12,7 +12,10 @@ pub struct Docker {
 }
 
 #[allow(clippy::option_if_let_else)]
-fn deserialize_container_name<'de, D>(d: D) -> Result<String, D::Error> where D: Deserializer<'de> {
+fn deserialize_container_name<'de, D>(d: D) -> Result<String, D::Error>
+where
+	D: Deserializer<'de>,
+{
 	let name: String = Deserialize::deserialize(d)?;
 	Ok(if let Some(name) = name.strip_prefix('/') { name.to_owned() } else { name })
 }

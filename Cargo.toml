@@ -17,3 +17,15 @@ crate-type = ['cdylib']
 lto = "thin"
 panic = "abort"
 strip = "debuginfo"
+
+[lints.clippy]
+nursery = "warn"
+pedantic = "warn"
+dbg_macro = "warn"
+float_cmp_const = "warn"
+multiple_inherent_impl = "warn"
+todo = "warn"
+unimplemented = "warn"
+unwrap_in_result = "warn"
+unwrap_used = "warn"
+use_debug = "warn"
