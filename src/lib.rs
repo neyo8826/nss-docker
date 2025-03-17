@@ -1,20 +1,19 @@
 mod docker;
 
+use crate::docker::{Container, Network, SmallContainer};
 use docker::Docker;
 use libnss::host::{AddressFamily, Addresses, Host, HostHooks};
 use libnss::interop::Response;
 use libnss::libnss_host_hooks;
-use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str::FromStr;
-
-use crate::docker::{Container, Network, SmallContainer};
+use std::sync::LazyLock;
 
 struct DockerHost;
 libnss_host_hooks!(docker, DockerHost);
 
-static DOCKER: Lazy<ResponseResult<Docker>> = Lazy::new(Docker::connect);
+static DOCKER: LazyLock<ResponseResult<Docker>> = LazyLock::new(Docker::connect);
 
 fn docker() -> ResponseResult<&'static Docker> {
 	DOCKER.as_ref().map_err(|&e| e)
